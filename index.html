@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tran Duc Duong</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"
+    ></script>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div
+        id="header"
+        class="d-flex justify-content-between border border-4 border-dark"
+      >
+        <div class="d-flex fs-4">
+          <div class="frame_img"></div>
+          <span class="ms-1">Logo</span>
+        </div>
+        <div
+          class="col-third fs-4 position-relative header_Blogs border border-4 border-dark border-top-0 border-bottom-0"
+        >
+          <div
+            class="border border-4 border-dark border-top-0 border-start-0 z-1 position-absolute header_Blogs_row"
+          ></div>
+          <div class="position-relative">Blogs</div>
+        </div>
+        <div class="d-flex align-items-center">
+          <img
+            class="img"
+            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwVLdSDmgrZN7TkzbHJb8dD0_7ASUQuERL2A&usqp=CAU"
+          />
+          <span>AdamLevine</span>
+        </div>
+      </div>
+      <div id="posts-container"></div>
+    </div>
+    <script>
+      const element = document.querySelector("#demo");
+      const getComments = async (postId) => {
+        const comments = await fetch(
+          `https://jsonplaceholder.typicode.com/posts/${postId}/comments`
+        );
+        const parseCommentsData = await comments.json().then((data) => data);
+        const commentElement = document.querySelector(`#comments-${postId}`);
+        parseCommentsData.forEach((c) => {
+          commentElement.innerHTML += `
+          <div class="mb-3">
+            <div class="row">
+                <div class="col-auto ms-3 mt-2 ">
+                  <img class= "img rounded-circle"src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_nLCu85ayoTKwYw6alnvrockq5QBT2ZWR2g&usqp=CAU"> 
+                </div>
+                <div class="col-10 mt-2 ">
+                      <div class="mb-1 text-capitalize namecomment_color">${c.name}</div>
+                      <div>${c.body}</div>
+                      <div class="mt-3 reply_color">Reply to</div>
+                </div>
+            </div>
+         </div>
+         `;
+        });
+        const replyBtn = document.getElementById(`reply-button-${postId}`);
+        const commentLength = parseCommentsData.length;
+        replyBtn.textContent =
+          commentLength > 1
+            ? `Replies (${commentLength})`
+            : `Reply (${commentLength})`;
+      };
+      const postContainer = document.querySelector("#posts-container");
+      const getPosts = async () => {
+        const posts = await fetch("https://jsonplaceholder.typicode.com/posts");
+        const parsePostsData = await posts.json().then((data) => data);
+        parsePostsData.forEach((p) => {
+          const postElement = document.createElement("div");
+          postElement.setAttribute("class", `post-${p.id} mb-5 border-bottom`);
+          postElement.innerHTML += `
+          <div class="mx-3"> 
+            <h1 class="text-uppercase text-center fs-4 fw-bold">${p.title}</h1>
+            <div class="fw-bolder">Author: John Smith</div>
+            <div class="fw-bolder">Create at: Sep 20,2019</div>
+            <div class="text-capitalize fw-bolder mt-4">${p.body}</div> 
+          </div> 
+          `;
+          const commentsBtn = document.createElement("button");
+          commentsBtn.setAttribute("id", `reply-button-${p.id}`);
+          commentsBtn.setAttribute(
+            "class",
+            "mx-3 mt-5 mb-2 btn btn-transparent fs-6 reply_color"
+          );
+          commentsBtn.textContent = "Reply";
+          commentsBtn.addEventListener("click", () => {
+            const commentEle = document.getElementById(`comments-${p.id}`);
+            const childNodeLength = commentEle.childNodes.length;
+            if (childNodeLength) {
+              commentEle.innerHTML = "";
+              const replyBtn = document.getElementById(`reply-button-${p.id}`);
+              replyBtn.textContent = "Reply";
+              return;
+            }
+            getComments(p.id);
+          });
+          postElement.appendChild(commentsBtn);
+          const commentsElement = document.createElement("div");
+          commentsElement.setAttribute("id", `comments-${p.id}`);
+          commentsElement.setAttribute("class", "bg-white");
+          postElement.appendChild(commentsElement);
+          postContainer.appendChild(postElement);
+        });
+      };
+      getPosts();
+    </script>
+  </body>
+</html>
